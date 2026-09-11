@@ -127,7 +127,7 @@ function App() {
       anchors: true,
     });
     window.__portfolioLenis = lenis;
-    const desktop = window.matchMedia('(min-width: 761px)');
+    const desktop = window.matchMedia('(min-width: 761px) and (min-height: 521px)');
     let snapTimer = 0;
     let isSnapping = false;
     const scheduleSnap = () => {
@@ -139,7 +139,7 @@ function App() {
           scheduleSnap();
           return;
         }
-        const stops = [...document.querySelectorAll('.intro, .about, .work-reveal, .projects, .services, .clients')]
+        const stops = [...document.querySelectorAll('.intro, .about, .work-reveal, .projects, .clients')]
           .map((section) => section.offsetLeft);
         if (!stops.length) return;
         const current = lenis.scroll ?? window.scrollY;
@@ -204,7 +204,7 @@ function App() {
   useEffect(() => {
     const root = story.current;
     if (!root) return;
-    const desktop = window.matchMedia('(min-width: 761px)');
+    const desktop = window.matchMedia('(min-width: 761px) and (min-height: 521px)');
     let frame = 0;
     const measure = () => {
       if (!desktop.matches) {
