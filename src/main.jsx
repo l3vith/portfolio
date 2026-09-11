@@ -151,12 +151,12 @@ function App() {
         if (distance < 4 || distance >= window.innerWidth * 0.5) return;
         isSnapping = true;
         lenis.scrollTo(nearest, {
-          duration: 0.35,
+          duration: 0.2,
           easing: (progress) => 1 - Math.pow(1 - progress, 3),
           onComplete: () => { isSnapping = false; },
         });
-        window.setTimeout(() => { isSnapping = false; }, 700);
-      }, 80);
+        window.setTimeout(() => { isSnapping = false; }, 500);
+      }, 60);
     };
     const onUserScroll = () => {
       isSnapping = false;
