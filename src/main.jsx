@@ -127,30 +127,43 @@ function App() {
       anchors: true,
     });
     window.__portfolioLenis = lenis;
+    const desktop = window.matchMedia('(min-width: 761px)');
     let snapTimer = 0;
     let isSnapping = false;
     const scheduleSnap = () => {
       window.clearTimeout(snapTimer);
-      if (isSnapping || !window.matchMedia('(min-width: 761px)').matches) return;
+      if (!desktop.matches || lenis.isStopped) return;
       snapTimer = window.setTimeout(() => {
-        const chapterStops = [...document.querySelectorAll('.intro, .about, .work-reveal, .projects, .services, .clients')]
+        if (!desktop.matches || lenis.isStopped || isSnapping) return;
+        if (Math.abs(lenis.velocity) > 0.15) {
+          scheduleSnap();
+          return;
+        }
+        const stops = [...document.querySelectorAll('.intro, .about, .work-reveal, .projects, .services, .clients')]
           .map((section) => section.offsetLeft);
-        const current = lenis.targetScroll;
-        const nearest = chapterStops.reduce((best, stop) =>
-          Math.abs(stop - current) < Math.abs(best - current) ? stop : best, chapterStops[0] ?? 0);
+        if (!stops.length) return;
+        const current = lenis.scroll ?? window.scrollY;
+        let nearest = stops[0];
+        for (const stop of stops) {
+          if (Math.abs(stop - current) < Math.abs(nearest - current)) nearest = stop;
+        }
         const distance = Math.abs(nearest - current);
-        if (distance < 8) return;
+        if (distance < 4 || distance >= window.innerWidth * 0.5) return;
         isSnapping = true;
         lenis.scrollTo(nearest, {
-          duration: 0.72,
+          duration: 0.35,
           easing: (progress) => 1 - Math.pow(1 - progress, 3),
           onComplete: () => { isSnapping = false; },
         });
-      }, 220);
+        window.setTimeout(() => { isSnapping = false; }, 700);
+      }, 80);
     };
-    window.addEventListener('wheel', scheduleSnap, { passive: true });
-    window.addEventListener('touchend', scheduleSnap, { passive: true });
-    window.addEventListener('scrollend', scheduleSnap, { passive: true });
+    const onUserScroll = () => {
+      isSnapping = false;
+      scheduleSnap();
+    };
+    window.addEventListener('wheel', onUserScroll, { passive: true });
+    window.addEventListener('touchend', onUserScroll, { passive: true });
     let frame = 0;
     const tick = (time) => {
       lenis.raf(time);
@@ -159,9 +172,8 @@ function App() {
     frame = requestAnimationFrame(tick);
     return () => {
       window.clearTimeout(snapTimer);
-      window.removeEventListener('wheel', scheduleSnap);
-      window.removeEventListener('touchend', scheduleSnap);
-      window.removeEventListener('scrollend', scheduleSnap);
+      window.removeEventListener('wheel', onUserScroll);
+      window.removeEventListener('touchend', onUserScroll);
       cancelAnimationFrame(frame);
       lenis.destroy();
       delete window.__portfolioLenis;
@@ -289,8 +301,10 @@ function App() {
     </section>
 
     <section className="work-reveal chapter" aria-label="Selected work">
-      <div className="work-stage"><div className="work-title"><span>THE</span><div className="mosaic">
-        {projects.slice(0, 6).map((project) => <ProjectVisual key={project.name} type={project.className} mini />)}
+      <div className="work-stage"><div className="work-title"><span>THE</span><div className="mosaic work-collage">
+        <img className="work-wide" src="/semtimbre.png" alt="Septiembre project" />
+        <img src="/sonara.png" alt="Sonora project" />
+        <img src="/clip8.png" alt="Chip8 Astro Dodge project" />
       </div><span>WORK</span></div></div>
     </section>
 
